@@ -2,6 +2,7 @@ package com.prohitman.onefarmmod.blocks.entities;
 
 import com.prohitman.onefarmmod.OneFarmMod;
 import com.prohitman.onefarmmod.blocks.OneFarmBlock;
+import com.prohitman.onefarmmod.loottables.LootUtil;
 import net.minecraft.client.renderer.entity.ItemEntityRenderer;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.core.BlockPos;
@@ -14,11 +15,13 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Inventory;
@@ -30,13 +33,19 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BarrelBlock;
 import net.minecraft.world.level.block.entity.*;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.loot.LootParams;
+import net.minecraft.world.level.storage.loot.LootTable;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.AABB;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.items.ItemStackHandler;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
 
@@ -88,29 +97,55 @@ public class OneFarmBlockEntity extends RandomizableContainerBlockEntity {
         //System.out.println("Previous Rotation: " + entity.previousRotation);
         //System.out.println("Current Rotation: " + entity.rotation);
         entity.tickCount++;
-        entity.ticksUntilNextGen++;
-        entity.prevSwitchProgress = entity.switchProgress;
+        //entity.prevSwitchProgress = entity.switchProgress;
         entity.previousRotation = entity.rotation;
+        if(entity.displayEntity == null){
+            entity.displayEntity = entity.getDisplayEntity(level);
+        }
+
         if (entity.prevDisplayUUID != entity.displayUUID) {
-            if (entity.switchProgress < 10.0F) {
+            /*if (entity.switchProgress < 10.0F) {
                 if (entity.switchProgress == 0) {
                     level.playSound((Player) null, pos, SoundEvents.GOAT_AMBIENT, SoundSource.BLOCKS);
                 }
                 entity.switchProgress++;
-            } else {
+            } else {*/
                 entity.prevDisplayEntity = entity.displayEntity;
                 entity.prevDisplayUUID = entity.displayUUID;
                 entity.markUpdated();
-            }
+            //}
             if (!entity.isRemoved() && level.isClientSide) {
                 //AlexsCaves.PROXY.playWorldSound(entity, (byte) 3);
             }
         }
+        //System.out.println("Display??" + entity.displayEntity);
 
         if (entity.displayEntity != null) {
+            //System.out.println("ticks??" + (entity.ticksUntilNextGen >= 100) + !level.isClientSide);
+
+            if(entity.ticksUntilNextGen >= 100 && !level.isClientSide){
+                //entity.markUpdated();
+                //System.out.println("Generating loot...");
+
+                LootTable entityLoot = LootUtil.getEntityLootTable(entity.displayEntity);
+                //entityLoot.getParamSet();
+                LootParams params = new LootParams.Builder((ServerLevel) level)
+                        .withParameter(LootContextParams.ORIGIN, entity.getBlockPos().getCenter())
+                        .withParameter(LootContextParams.THIS_ENTITY, entity.displayEntity)
+                        .withParameter(LootContextParams.BLOCK_STATE, entity.getBlockState())
+                        .withParameter(LootContextParams.TOOL, ItemStack.EMPTY)
+                        .withParameter(LootContextParams.BLOCK_ENTITY, entity)
+                        .withParameter(LootContextParams.EXPLOSION_RADIUS, 0f)
+                        .create(LootContextParamSets.BLOCK);
+                List<ItemStack> items = entityLoot.getRandomItems(params);
+                //System.out.println("Item generated: " + items);
+                //entity.itemHandler.setStackInSlot(0, items.get(0));
+                entity.fillItemsInSlots(items);
+                entity.ticksUntilNextGen = 0;
+            }
             if(entity.displayUUID != entity.displayEntity.getUUID()){
                 entity.displayUUID = entity.displayEntity.getUUID();
-                entity.switchProgress = 0.0F;
+                //entity.switchProgress = 0.0F;
             }
         }
 
@@ -119,10 +154,30 @@ public class OneFarmBlockEntity extends RandomizableContainerBlockEntity {
             //System.out.println("received signal!!");
             //entity.rotation = (entity.rotation + redstoneSignal)*0.3f;
             entity.rotation += 0.5f;
+            entity.ticksUntilNextGen++;
         }
         //entity.rotation += 0.1f;
         entity.markUpdated();
         //System.out.println("Rotation: " + entity.rotation + "Prev Rotation: " + entity.previousRotation);
+    }
+
+    public void fillItemsInSlots(List<ItemStack> items){
+        for(ItemStack stack : items){
+            if(!stack.isEmpty()){
+                for(int i=0; i<this.getContainerSize(); i++){
+                    if(this.getItem(i).is(stack.getItem()) && (this.getItem(i).getCount() + stack.getCount()) <= stack.getItem().getMaxStackSize()){
+                        stack.setCount(stack.getCount() + this.getItem(i).getCount());
+                        this.setItem(i, stack);
+                        break;
+                    } else if(this.getItem(i).isEmpty()){
+                        this.setItem(i, stack);
+                        break;
+                    }
+                }
+            }
+        }
+
+        this.markUpdated();
     }
 
     public void load(CompoundTag tag) {
@@ -138,6 +193,7 @@ public class OneFarmBlockEntity extends RandomizableContainerBlockEntity {
         this.ticksUntilNextGen = tag.getInt("NextGen");
 
         this.items = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
+
         if (!this.tryLoadLootTable(tag)) {
             ContainerHelper.loadAllItems(tag, this.items);
         }
@@ -181,7 +237,8 @@ public class OneFarmBlockEntity extends RandomizableContainerBlockEntity {
             this.entityTag = packet.getTag().getCompound("EntityTag");
             this.rotation = packet.getTag().getFloat("Rotation");
             this.previousRotation = packet.getTag().getFloat("PrevRotation");
-
+            this.ticksUntilNextGen = packet.getTag().getInt("NextGen");
+            this.tickCount = packet.getTag().getInt("TickCount");
         }
     }
 
@@ -195,7 +252,8 @@ public class OneFarmBlockEntity extends RandomizableContainerBlockEntity {
         }
         compoundtag.putFloat("Rotation", this.rotation);
         compoundtag.putFloat("PrevRotation", this.previousRotation);
-
+        compoundtag.putInt("NextGen", this.ticksUntilNextGen);
+        compoundtag.putInt("TickCount", this.tickCount);
         return compoundtag;
     }
 

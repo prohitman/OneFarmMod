@@ -13,6 +13,7 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.client.model.WolfModel;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -122,12 +123,12 @@ public class OneFarmBlockEntityRenderer<T extends OneFarmBlockEntity> implements
         } else if */
         poseStack.pushPose();
         //poseStack.translate(0F, -0.2F, 0F);
-        poseStack.mulPose(Axis.YP.rotationDegrees(180 - cameraY));
+        //poseStack.mulPose(Axis.YP.rotationDegrees(180 - cameraY));
         if (holoEntity != null) {
             poseStack.pushPose();
             //poseStack.scale(1, amount, 1);
-            poseStack.translate(0, 1.5+ 1 /*+ bob1*//*holoEntity.getBbHeight()-Vec3.atBottomCenterOf(projectorBlockEntity.getBlockPos()).y+1*/, 0);
-            poseStack.mulPose(Axis.YN.rotationDegrees(( 180 - cameraY + projectorBlockEntity.getRotation(partialTicks))));
+            poseStack.translate(0, 1.25 + 1 + bob1 /*+ bob1*//*holoEntity.getBbHeight()-Vec3.atBottomCenterOf(projectorBlockEntity.getBlockPos()).y+1*/, 0);
+            poseStack.mulPose(Axis.YN.rotationDegrees((/* 180 - cameraY + */projectorBlockEntity.getRotation(partialTicks))));
             //System.out.println("Rotation: " + projectorBlockEntity.getRotation(partialTicks));
             //System.out.println("Client Previous Rotation: " + projectorBlockEntity.previousRotation);
             //System.out.println("Client Current Rotation: " + projectorBlockEntity.rotation);
@@ -189,7 +190,8 @@ public class OneFarmBlockEntityRenderer<T extends OneFarmBlockEntity> implements
                         prevCrouching = humanoidModel.crouching;
                         humanoidModel.crouching = false;
                     }
-                    model.setupAnim(living, 0.0F, 0.0F, -0.1F, 0.0F, 0.0F);
+                    model.prepareMobModel(living, 0, 0, partialTicks);
+                    model.setupAnim(living, 0.0F, 0.0F, 0.2F, 0.0F, 0.0F);
 
                     matrixStack.scale(-living.getScale(), -living.getScale(), living.getScale());
 

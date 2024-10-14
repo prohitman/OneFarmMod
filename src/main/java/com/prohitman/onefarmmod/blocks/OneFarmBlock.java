@@ -60,7 +60,7 @@ public class OneFarmBlock extends BaseEntityBlock {
     public void stepOn(Level pLevel, BlockPos pPos, BlockState pState, Entity pEntity) {
         super.stepOn(pLevel, pPos, pState, pEntity);
         if(pLevel.getBlockEntity(pPos) instanceof OneFarmBlockEntity oneFarmBlockEntity && oneFarmBlockEntity.getDisplayEntity(pLevel) == null){
-            if(pEntity instanceof LivingEntity livingEntity && pEntity.getType().getCategory().isFriendly() && !(pEntity instanceof Player) && !(livingEntity instanceof ArmorStand) && livingEntity.isAlive()){
+            if(pEntity instanceof LivingEntity livingEntity && !livingEntity.isBaby() && pEntity.getType().getCategory().isFriendly() && !(pEntity instanceof Player) && !(livingEntity instanceof ArmorStand) && livingEntity.isAlive()){
                 CompoundTag entityTag = pEntity.serializeNBT();
                 entityTag.putString("id", ForgeRegistries.ENTITY_TYPES.getKey(pEntity.getType()).toString());
 
@@ -98,7 +98,7 @@ public class OneFarmBlock extends BaseEntityBlock {
         }
 
         return createTickerHelper(pBlockEntityType, OneFarmMod.ONE_FARM_BLOCK_ENTITY.get(),
-                (pLevel1, pPos, pState1, pBlockEntity) -> pBlockEntity.tick(pLevel1, pPos, pState1, pBlockEntity));
+                OneFarmBlockEntity::tick);
     }
 
     @Nullable
