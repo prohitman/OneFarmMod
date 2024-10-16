@@ -19,13 +19,17 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
-import net.minecraft.client.renderer.entity.EntityRenderer;
-import net.minecraft.client.renderer.entity.LivingEntityRenderer;
+import net.minecraft.client.renderer.entity.*;
+import net.minecraft.client.renderer.entity.layers.RenderLayer;
+import net.minecraft.client.renderer.entity.layers.SheepFurLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.animal.Sheep;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.*;
@@ -79,7 +83,7 @@ public class OneFarmBlockEntityRenderer<T extends OneFarmBlockEntity> implements
         Entity holoEntity = projectorBlockEntity.getDisplayEntity(Minecraft.getInstance().level);
         float amount = projectorBlockEntity.getSwitchAmount(partialTicks);
         float ticks = projectorBlockEntity.tickCount + partialTicks;
-        float bob1 = (float) (Math.sin(ticks * 0.05F + amount) * 0.1F);
+        float bob1 = (float) (Math.sin(ticks * 0.025F + amount) * 0.1F);
         float bob2 = (float) (Math.cos(ticks * 0.05F + amount) * 0.1F);
         float length = (1F + bob1) * amount;
         float width = ((holoEntity == null ? 0.8F : holoEntity.getBbWidth()) + bob2) * amount;
@@ -124,20 +128,52 @@ public class OneFarmBlockEntityRenderer<T extends OneFarmBlockEntity> implements
         poseStack.pushPose();
         //poseStack.translate(0F, -0.2F, 0F);
         //poseStack.mulPose(Axis.YP.rotationDegrees(180 - cameraY));
+
         if (holoEntity != null) {
             poseStack.pushPose();
             //poseStack.scale(1, amount, 1);
-            poseStack.translate(0, 1.25 + 1 + bob1 /*+ bob1*//*holoEntity.getBbHeight()-Vec3.atBottomCenterOf(projectorBlockEntity.getBlockPos()).y+1*/, 0);
-            poseStack.mulPose(Axis.YN.rotationDegrees((/* 180 - cameraY + */projectorBlockEntity.getRotation(partialTicks))));
+            poseStack.translate(0, 0.5f, 0);
+            //poseStack.translate(0, 0/*0.5 + bob1*//*+ bob1*//*holoEntity.getBbHeight()-Vec3.atBottomCenterOf(projectorBlockEntity.getBlockPos()).y+1*/, 0);
+            //poseStack.mulPose(Axis.YN.rotationDegrees((/* 180 - cameraY + */projectorBlockEntity.getRotation(partialTicks))));
+            //System.out.println("Count " + projectorBlockEntity.tickCount + " " + bob1 + " " + partialTicks);
             //System.out.println("Rotation: " + projectorBlockEntity.getRotation(partialTicks));
             //System.out.println("Client Previous Rotation: " + projectorBlockEntity.previousRotation);
             //System.out.println("Client Current Rotation: " + projectorBlockEntity.rotation);
+            float scaleFactor = calculateScaleFactor(holoEntity.getBbHeight(), holoEntity.getBbWidth(), 1.3f);
+            scaleModel(poseStack, scaleFactor);
             renderEntityInHologram(holoEntity, 0, 0, 0, 0, partialTicks, poseStack, bufferIn, 240);
             poseStack.popPose();
         }
         poseStack.popPose();
         poseStack.popPose();
 
+    }
+
+    /**
+     * Scales the model to fit within a 1x1x1 block.
+     *
+     * @param height The height of the model.
+     * @param width The width of the model.
+     * @param depth The depth of the model (optional if you're working in 3D).
+     * @return The scaling factor to fit the model within a 1x1x1 block.
+     */
+    public static float calculateScaleFactor(float height, float width, float depth) {
+        // Determine the largest dimension of the model
+        float largestDimension = Math.max(height, Math.max(width, depth));
+
+        // Calculate the scaling factor to fit within 1 block (1 unit size)
+        return 1.0f / largestDimension;
+    }
+
+    /**
+     * Applies the scaling factor to the rendering of the model.
+     *
+     * @param poseStack The PoseStack used for rendering.
+     * @param scaleFactor The calculated scaling factor.
+     */
+    public static void scaleModel(PoseStack poseStack, float scaleFactor) {
+        // Apply the scaling transformation to the PoseStack (uniform scaling)
+        poseStack.scale(scaleFactor, scaleFactor, scaleFactor);
     }
 
 
@@ -178,10 +214,10 @@ public class OneFarmBlockEntityRenderer<T extends OneFarmBlockEntity> implements
                 entityIn.yRotO = 0;
                 if (render instanceof LivingEntityRenderer renderer && renderer.getModel() != null) {
                     EntityModel model = renderer.getModel();
-                    //VertexConsumer ivertexbuilder = bufferIn.getBuffer(ACRenderTypes.getHologram(render.getTextureLocation(entityIn)));
+                    ///VertexConsumer ivertexbuilder = bufferIn.getBuffer(ACRenderTypes.getHologram(render.getTextureLocation(entityIn)));
                     VertexConsumer ivertexbuilder = bufferIn.getBuffer(RenderType.entityTranslucent(render.getTextureLocation(entityIn)));
                     matrixStack.pushPose();
-                    boolean shouldSit = entityIn.isPassenger() && (entityIn.getVehicle() != null && entityIn.getVehicle().shouldRiderSit());
+                    /*boolean shouldSit = entityIn.isPassenger() && (entityIn.getVehicle() != null && entityIn.getVehicle().shouldRiderSit());
                     model.young = living.isBaby();
                     model.riding = shouldSit;
                     model.attackTime = living.getAttackAnim(partialTicks);
@@ -189,30 +225,127 @@ public class OneFarmBlockEntityRenderer<T extends OneFarmBlockEntity> implements
                     if (model instanceof HumanoidModel<?> humanoidModel) {
                         prevCrouching = humanoidModel.crouching;
                         humanoidModel.crouching = false;
+                    }*/
+                    //matrixStack.scale(-living.getScale(), -living.getScale(), living.getScale());
+                    //((LivingEntityRendererAccessor)renderer).scaleForHologram(living, matrixStack, partialTicks);
+                    //VertexConsumerWrapper.Source source  = new VertexConsumerWrapper.Source(bufferIn, 0.7f, renderer.getTextureLocation(entityIn));
+                    renderer.render((LivingEntity) entityIn, 0, partialTicks, matrixStack, bufferIn, 240);
+                    ///model.prepareMobModel(living, 0, 0, partialTicks);
+                    //model.setupAnim(living, 0.0F, 0.0F, 0.2F, 0.0F, 0.0F);
+
+                    ///renderer.addLayer(new HologramOverlayLayer(renderer));
+
+                    //model.renderToBuffer(matrixStack, ivertexbuilder, 240, LIGHT_BLUE_OVERLAY, 1, 1, 1, 0.75F);
+
+
+                    /*model.attackTime = living.getAttackAnim(partialTicks);
+                    boolean shouldSit = entityIn.isPassenger() && entityIn.getVehicle() != null && entityIn.getVehicle().shouldRiderSit();
+                    model.riding = shouldSit;
+                    model.young = living.isBaby();
+                    float f = Mth.rotLerp(partialTicks, living.yBodyRotO, living.yBodyRot);
+                    float f1 = Mth.rotLerp(partialTicks, living.yHeadRotO, living.yHeadRot);
+                    float f2 = f1 - f;
+                    float f7;
+                    if (shouldSit && living.getVehicle() instanceof LivingEntity) {
+                        LivingEntity livingentity = (LivingEntity)living.getVehicle();
+                        f = Mth.rotLerp(partialTicks, livingentity.yBodyRotO, livingentity.yBodyRot);
+                        f2 = f1 - f;
+                        f7 = Mth.wrapDegrees(f2);
+                        if (f7 < -85.0F) {
+                            f7 = -85.0F;
+                        }
+
+                        if (f7 >= 85.0F) {
+                            f7 = 85.0F;
+                        }
+
+                        f = f1 - f7;
+                        if (f7 * f7 > 2500.0F) {
+                            f += f7 * 0.2F;
+                        }
+
+                        f2 = f1 - f;
                     }
-                    model.prepareMobModel(living, 0, 0, partialTicks);
-                    model.setupAnim(living, 0.0F, 0.0F, 0.2F, 0.0F, 0.0F);
 
-                    matrixStack.scale(-living.getScale(), -living.getScale(), living.getScale());
+                    float f6 = Mth.lerp(partialTicks, living.xRotO, living.getXRot());
+                    if (LivingEntityRenderer.isEntityUpsideDown(living)) {
+                        f6 *= -1.0F;
+                        f2 *= -1.0F;
+                    }
 
+                    float f8;
+                    if (living.hasPose(Pose.SLEEPING)) {
+                        Direction direction = living.getBedOrientation();
+                        if (direction != null) {
+                            f8 = living.getEyeHeight(Pose.STANDING) - 0.1F;
+                            matrixStack.translate((float)(-direction.getStepX()) * f8, 0.0F, (float)(-direction.getStepZ()) * f8);
+                        }
+                    }
+
+                    f7 = living.tickCount + partialTicks;
+                    renderer.setupRotations(living, matrixStack, 0, 0, partialTicks);
+                    matrixStack.scale(-1.0F, -1.0F, 1.0F);
                     ((LivingEntityRendererAccessor)renderer).scaleForHologram(living, matrixStack, partialTicks);
-                    //renderer.addLayer(new HologramOverlayLayer(renderer));
+                    //matrixStack.translate(0.0F, -1.501F, 0.0F);
+                    f8 = 0.0F;
+                    float f5 = 0.0F;
+                    if (!shouldSit && entityIn.isAlive()) {
+                        f8 = living.walkAnimation.speed(0);
+                        f5 = living.walkAnimation.position(0);
+                        if (living.isBaby()) {
+                            f5 *= 3.0F;
+                        }
 
-                    model.renderToBuffer(matrixStack, ivertexbuilder, 240, LIGHT_BLUE_OVERLAY, 1, 1, 1, 0.75F);
+                        if (f8 > 1.0F) {
+                            f8 = 1.0F;
+                        }
+                    }
+
+                    model.prepareMobModel(living, 0, 0, 0);
+                    model.setupAnim(living, 0, 0, 0, 0, 0);
+                    Minecraft minecraft = Minecraft.getInstance();
+                    //boolean flag = renderer.isBodyVisible(pEntity);
+                    //boolean flag1 = !flag && !pEntity.isInvisibleTo(minecraft.player);
+                    //boolean flag2 = minecraft.shouldEntityAppearGlowing(pEntity);
+                    RenderType rendertype = RenderType.entityTranslucent(renderer.getTextureLocation(living), true);
+
+                    VertexConsumer vertexconsumer = bufferIn.getBuffer(rendertype);
+
+                    //int i = getOverlayCoords(pEntity, this.getWhiteOverlayProgress(pEntity, pPartialTicks));
+                    model.renderToBuffer(matrixStack, vertexconsumer, 240, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 0.75f);
+
+
+                    if (!living.isSpectator()) {
+                        Iterator var24 = renderer.layers.iterator();
+                        bufferIn.getBuffer(RenderType.translucent());
+
+                        while(var24.hasNext()) {
+                            RenderLayer renderlayer = (RenderLayer)var24.next();
+                            renderlayer.render(matrixStack, bufferIn, 240, living, f5, f8, partialTicks, f7, f2, f6);
+                        }
+                    }
+                    //VertexConsumer vertexconsumer = bufferIn.getBuffer(RenderType.eyes(HologramOverlayLayer.OVERLAY));
+                    //model.renderToBuffer(matrixStack, vertexconsumer, 0, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 0.1F);
+
+
+*//*                    matrixStack.pushPose();
+                    VertexConsumer vertexconsumer = bufferIn.getBuffer(RenderType.eyes(HologramOverlayLayer.OVERLAY));
+                    model.renderToBuffer(matrixStack, vertexconsumer, 240, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 0.1F);
+                    matrixStack.popPose();*/
 
                     matrixStack.popPose();
-                    if (model instanceof HumanoidModel<?> humanoidModel) {
+                    /*if (model instanceof HumanoidModel<?> humanoidModel) {
                         humanoidModel.crouching = prevCrouching;
-                    }
+                    }*/
                 }
-                entityIn.setXRot(xRot);
+/*                entityIn.setXRot(xRot);
                 entityIn.xRotO = xRotOld;
                 entityIn.setYRot(yRot);
                 entityIn.yRotO = yRotOld;
                 living.yHeadRot = headRot;
                 living.yHeadRotO = headRotOld;
                 living.yBodyRot = yBodyRot;
-                living.yBodyRotO = yBodyRotOld;
+                living.yBodyRotO = yBodyRotOld;*/
             }
             Minecraft.getInstance().getMainRenderTarget().bindWrite(false);
         } catch (Throwable throwable3) {

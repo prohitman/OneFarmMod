@@ -1,8 +1,10 @@
 package com.prohitman.onefarmmod.blocks.entities;
 
+import com.prohitman.onefarmmod.Config;
 import com.prohitman.onefarmmod.OneFarmMod;
 import com.prohitman.onefarmmod.blocks.OneFarmBlock;
 import com.prohitman.onefarmmod.loottables.LootUtil;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.ItemEntityRenderer;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.core.BlockPos;
@@ -24,6 +26,7 @@ import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -54,12 +57,12 @@ public class OneFarmBlockEntity extends RandomizableContainerBlockEntity {
     private final ItemStackHandler itemHandler = new ItemStackHandler(27);
     private final ContainerOpenersCounter openersCounter = new ContainerOpenersCounter() {
         protected void onOpen(Level p_155062_, BlockPos p_155063_, BlockState p_155064_) {
-            OneFarmBlockEntity.this.playSound(p_155064_, SoundEvents.FROG_HURT);
+            OneFarmBlockEntity.this.playSound(p_155064_, SoundEvents.ENDER_CHEST_OPEN);
             OneFarmBlockEntity.this.updateBlockState(p_155064_, true);
         }
 
         protected void onClose(Level p_155072_, BlockPos p_155073_, BlockState p_155074_) {
-            OneFarmBlockEntity.this.playSound(p_155074_, SoundEvents.ALLAY_AMBIENT_WITH_ITEM);
+            OneFarmBlockEntity.this.playSound(p_155074_, SoundEvents.ENDER_CHEST_CLOSE);
             OneFarmBlockEntity.this.updateBlockState(p_155074_, false);
         }
 
@@ -88,6 +91,7 @@ public class OneFarmBlockEntity extends RandomizableContainerBlockEntity {
     private UUID displayUUID;
     private UUID prevDisplayUUID;
     public int ticksUntilNextGen;
+    public int maxTicksUntilGen = Config.farmGenTicks.get();
 
     public OneFarmBlockEntity(BlockPos pPos, BlockState pBlockState) {
         super(OneFarmMod.ONE_FARM_BLOCK_ENTITY.get(), pPos, pBlockState);
@@ -123,9 +127,11 @@ public class OneFarmBlockEntity extends RandomizableContainerBlockEntity {
         if (entity.displayEntity != null) {
             //System.out.println("ticks??" + (entity.ticksUntilNextGen >= 100) + !level.isClientSide);
 
-            if(entity.ticksUntilNextGen >= 100 && !level.isClientSide){
+            if(entity.ticksUntilNextGen >= entity.maxTicksUntilGen && !level.isClientSide){
                 //entity.markUpdated();
                 //System.out.println("Generating loot...");
+                LivingEntity livingEntity = ((LivingEntity)entity.displayEntity);
+                LootTable entityLootTable = livingEntity.getServer().getLootData().getLootTable(livingEntity.getLootTable());
 
                 LootTable entityLoot = LootUtil.getEntityLootTable(entity.displayEntity);
                 //entityLoot.getParamSet();
@@ -137,7 +143,7 @@ public class OneFarmBlockEntity extends RandomizableContainerBlockEntity {
                         .withParameter(LootContextParams.BLOCK_ENTITY, entity)
                         .withParameter(LootContextParams.EXPLOSION_RADIUS, 0f)
                         .create(LootContextParamSets.BLOCK);
-                List<ItemStack> items = entityLoot.getRandomItems(params);
+                List<ItemStack> items = entityLootTable.getRandomItems(params);
                 //System.out.println("Item generated: " + items);
                 //entity.itemHandler.setStackInSlot(0, items.get(0));
                 entity.fillItemsInSlots(items);
@@ -279,6 +285,10 @@ public class OneFarmBlockEntity extends RandomizableContainerBlockEntity {
             return prevDisplayEntity;
         }
         return displayEntity;
+    }
+
+    public EntityType getEntityType(){
+        return entityType;
     }
 
     public float getSwitchAmount(float partialTicks) {

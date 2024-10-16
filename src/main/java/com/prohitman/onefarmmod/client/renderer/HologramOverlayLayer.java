@@ -12,7 +12,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 
 public class HologramOverlayLayer extends RenderLayer {
-    private static final ResourceLocation OVERLAY = new ResourceLocation(OneFarmMod.MODID, "textures/entity/overlay_light_blue.png");
+    public static final ResourceLocation OVERLAY = new ResourceLocation(OneFarmMod.MODID, "textures/entity/overlay_light_blue.png");
 
     public HologramOverlayLayer(RenderLayerParent pRenderer) {
         super(pRenderer);

@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "onefarmmod:block/one_farm_block"
+  }
+}

@@ -1,12 +1,12 @@
 package com.prohitman.onefarmmod.blocks;
 
 import com.prohitman.onefarmmod.OneFarmMod;
-import com.prohitman.onefarmmod.blocks.entities.OneFarmBlockEntity;
-import com.prohitman.onefarmmod.datagen.server.ModEntityTags;
+import com.prohitman.onefarmmod.blocks.entities.BreederBlockEntity;
+import com.prohitman.onefarmmod.client.screen.BreederScreen;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.Container;
@@ -15,10 +15,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.NeutralMob;
 import net.minecraft.world.entity.animal.Animal;
-import net.minecraft.world.entity.animal.Chicken;
-import net.minecraft.world.entity.animal.Squid;
 import net.minecraft.world.entity.animal.WaterAnimal;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.monster.piglin.PiglinAi;
@@ -35,13 +32,14 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraftforge.network.NetworkHooks;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.Nullable;
 
-public class OneFarmBlock extends BaseEntityBlock {
+public class BreederBlock extends BaseEntityBlock {
     public static final BooleanProperty OPEN = BlockStateProperties.OPEN;
 
-    public OneFarmBlock(Properties pProperties) {
+    public BreederBlock(Properties pProperties) {
         super(pProperties);
         this.registerDefaultState(this.stateDefinition.any().setValue(OPEN, Boolean.valueOf(false)));
     }
@@ -51,27 +49,14 @@ public class OneFarmBlock extends BaseEntityBlock {
             return InteractionResult.SUCCESS;
         } else {
             BlockEntity blockentity = pLevel.getBlockEntity(pPos);
-            if (blockentity instanceof OneFarmBlockEntity) {
-                pPlayer.openMenu((OneFarmBlockEntity)blockentity);
+            if (blockentity instanceof BreederBlockEntity) {
+                NetworkHooks.openScreen(((ServerPlayer)pPlayer), (BreederBlockEntity)blockentity, pPos);
+
                 pPlayer.awardStat(Stats.OPEN_BARREL);
                 PiglinAi.angerNearbyPiglins(pPlayer, true);
             }
 
             return InteractionResult.CONSUME;
-        }
-    }
-    @Override
-    public void stepOn(Level pLevel, BlockPos pPos, BlockState pState, Entity pEntity) {
-        super.stepOn(pLevel, pPos, pState, pEntity);
-        if(pLevel.getBlockEntity(pPos) instanceof OneFarmBlockEntity oneFarmBlockEntity && oneFarmBlockEntity.getDisplayEntity(pLevel) == null){
-            if(pEntity instanceof LivingEntity livingEntity
-                    && (livingEntity.getType().is(ModEntityTags.FARMABLE_ENTITIES) || ((livingEntity instanceof Animal || livingEntity instanceof WaterAnimal) /*&& !(livingEntity instanceof NeutralMob) */ && pEntity.getType().getCategory().isFriendly())) && !(pEntity instanceof Player) && !(livingEntity instanceof ArmorStand) && livingEntity.isAlive() && !livingEntity.isBaby()){
-                CompoundTag entityTag = pEntity.serializeNBT();
-                entityTag.putString("id", ForgeRegistries.ENTITY_TYPES.getKey(pEntity.getType()).toString());
-
-                oneFarmBlockEntity.setEntity(pEntity.getType(), entityTag, pEntity.getXRot());
-                pEntity.remove(Entity.RemovalReason.DISCARDED);
-            }
         }
     }
 
@@ -89,8 +74,8 @@ public class OneFarmBlock extends BaseEntityBlock {
 
     public void tick(BlockState pState, ServerLevel pLevel, BlockPos pPos, RandomSource pRandom) {
         BlockEntity blockentity = pLevel.getBlockEntity(pPos);
-        if (blockentity instanceof OneFarmBlockEntity) {
-            ((OneFarmBlockEntity)blockentity).recheckOpen();
+        if (blockentity instanceof BreederBlockEntity) {
+            ((BreederBlockEntity)blockentity).recheckOpen();
         }
 
     }
@@ -102,14 +87,14 @@ public class OneFarmBlock extends BaseEntityBlock {
             return null;
         }
 
-        return createTickerHelper(pBlockEntityType, OneFarmMod.ONE_FARM_BLOCK_ENTITY.get(),
-                OneFarmBlockEntity::tick);
+        return createTickerHelper(pBlockEntityType, OneFarmMod.BREEDER_BLOCK_ENTITY.get(),
+                BreederBlockEntity::tick);
     }
 
     @Nullable
     @Override
     public BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
-        return new OneFarmBlockEntity(blockPos, blockState);
+        return new BreederBlockEntity(blockPos, blockState);
     }
 
     @Override
