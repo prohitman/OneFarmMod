@@ -16,6 +16,9 @@ import java.util.concurrent.CompletableFuture;
 
 public class ModEntityTags extends EntityTypeTagsProvider {
     public static final TagKey<EntityType<?>> FARMABLE_ENTITIES = create("farmable_entities");
+    public static final TagKey<EntityType<?>> BLACKLIST_ENTITIES = create("blacklist_entities");
+    public static final TagKey<EntityType<?>> MILK_EXTRACTABLE_ENTITIES = create("milk_extractable_entities");
+    public static final TagKey<EntityType<?>> WATER_EXTRACTABLE_ENTITIES = create("water_extractable_entities");
 
     public ModEntityTags(PackOutput packOutput, CompletableFuture<HolderLookup.Provider> providerCompletableFuture, @Nullable ExistingFileHelper existingFileHelper) {
         super(packOutput, providerCompletableFuture, OneFarmMod.MODID, existingFileHelper);
@@ -23,7 +26,11 @@ public class ModEntityTags extends EntityTypeTagsProvider {
 
     @Override
     protected void addTags(HolderLookup.Provider pProvider) {
-        super.addTags(pProvider);
+        this.tag(MILK_EXTRACTABLE_ENTITIES)
+                .add(EntityType.COW)
+                .add(EntityType.MOOSHROOM);
+        this.tag(WATER_EXTRACTABLE_ENTITIES)
+                .add(EntityType.SQUID);
     }
 
     private static TagKey<EntityType<?>> create(String pName) {

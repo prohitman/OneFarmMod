@@ -20,7 +20,10 @@ public class ModLanguageProvider extends LanguageProvider {
         addBlock(OneFarmMod.ONE_FARM_BLOCK);
         addBlock(OneFarmMod.BREEDER_BLOCK);
 
-        //add("itemGroup.onefarmblock", "Unsorted Starfall");
+        add("item.tooltip.onefarmblock", "\u00A77This block absorbs a passive entity when it walks on top. Once powered by redstone, it generates loot from the captured entity.");
+        add("item.tooltip.breederblock", "\u00A77This block generates spawn eggs from entities in adjacent farm blocks when powered by redstone.");
+
+        add("item.tooltip.press_shift", "\u00A7b[+SHIFT]");
     }
 
     public void addEffect(RegistryObject<MobEffect> key){
@@ -28,7 +31,7 @@ public class ModLanguageProvider extends LanguageProvider {
     }
 
     public void addBlock(RegistryObject<Block> key) {
-        add(key.get().getDescriptionId(), StringUtils.capitaliseAllWords(key.getId().getPath().replaceAll("_", " ")));
+        add(key.get().getDescriptionId(), StringUtils.capitaliseAllWords(key.getId().getPath().replaceAll("_", " ").replaceAll(" block", "")));
     }
 
     public void addItem(RegistryObject<Item> key){

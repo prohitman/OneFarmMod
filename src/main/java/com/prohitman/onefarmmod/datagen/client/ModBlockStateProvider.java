@@ -18,7 +18,7 @@ public class ModBlockStateProvider extends BlockStateProvider {
     @Override
     protected void registerStatesAndModels() {
         simpleBlock(OneFarmMod.ONE_FARM_BLOCK.get());
-        simpleBlock(OneFarmMod.BREEDER_BLOCK.get());
+        //simpleBlock(OneFarmMod.BREEDER_BLOCK.get());
 
     }
 

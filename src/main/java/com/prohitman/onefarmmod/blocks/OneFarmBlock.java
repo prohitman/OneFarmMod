@@ -65,7 +65,7 @@ public class OneFarmBlock extends BaseEntityBlock {
         super.stepOn(pLevel, pPos, pState, pEntity);
         if(pLevel.getBlockEntity(pPos) instanceof OneFarmBlockEntity oneFarmBlockEntity && oneFarmBlockEntity.getDisplayEntity(pLevel) == null){
             if(pEntity instanceof LivingEntity livingEntity
-                    && (livingEntity.getType().is(ModEntityTags.FARMABLE_ENTITIES) || ((livingEntity instanceof Animal || livingEntity instanceof WaterAnimal) /*&& !(livingEntity instanceof NeutralMob) */ && pEntity.getType().getCategory().isFriendly())) && !(pEntity instanceof Player) && !(livingEntity instanceof ArmorStand) && livingEntity.isAlive() && !livingEntity.isBaby()){
+                    && !livingEntity.getType().is(ModEntityTags.BLACKLIST_ENTITIES) && (livingEntity.getType().is(ModEntityTags.FARMABLE_ENTITIES) || ((livingEntity instanceof Animal || livingEntity instanceof WaterAnimal) /*&& !(livingEntity instanceof NeutralMob) */ && pEntity.getType().getCategory().isFriendly())) && !(pEntity instanceof Player) && !(livingEntity instanceof ArmorStand) && livingEntity.isAlive() && !livingEntity.isBaby()){
                 CompoundTag entityTag = pEntity.serializeNBT();
                 entityTag.putString("id", ForgeRegistries.ENTITY_TYPES.getKey(pEntity.getType()).toString());
 

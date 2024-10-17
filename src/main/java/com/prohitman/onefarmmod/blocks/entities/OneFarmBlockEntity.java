@@ -3,6 +3,7 @@ package com.prohitman.onefarmmod.blocks.entities;
 import com.prohitman.onefarmmod.Config;
 import com.prohitman.onefarmmod.OneFarmMod;
 import com.prohitman.onefarmmod.blocks.OneFarmBlock;
+import com.prohitman.onefarmmod.datagen.server.ModEntityTags;
 import com.prohitman.onefarmmod.loottables.LootUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.ItemEntityRenderer;
@@ -31,7 +32,9 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ChestMenu;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BarrelBlock;
 import net.minecraft.world.level.block.entity.*;
@@ -147,6 +150,10 @@ public class OneFarmBlockEntity extends RandomizableContainerBlockEntity {
                 //System.out.println("Item generated: " + items);
                 //entity.itemHandler.setStackInSlot(0, items.get(0));
                 entity.fillItemsInSlots(items);
+                if(level.getRandom().nextInt(3) == 0){
+                    entity.fillBuckets(items);
+                }
+
                 entity.ticksUntilNextGen = 0;
             }
             if(entity.displayUUID != entity.displayEntity.getUUID()){
@@ -165,6 +172,52 @@ public class OneFarmBlockEntity extends RandomizableContainerBlockEntity {
         //entity.rotation += 0.1f;
         entity.markUpdated();
         //System.out.println("Rotation: " + entity.rotation + "Prev Rotation: " + entity.previousRotation);
+    }
+
+    public void fillBuckets(List<ItemStack> items){
+        boolean isMilkable = this.entityType.is(ModEntityTags.MILK_EXTRACTABLE_ENTITIES);
+        boolean isWaterable = this.entityType.is(ModEntityTags.WATER_EXTRACTABLE_ENTITIES);
+
+        ItemStack liquidBucket;
+        boolean hasBucket = false;
+        int bucketIndex = 0;
+
+        if(isWaterable || isMilkable){
+            for(int i=0; i<this.getContainerSize(); i++){
+                if(this.getItem(i).is(Items.BUCKET) && !hasBucket){
+                    hasBucket = true;
+                    bucketIndex = i;
+                    if(this.getItem(i).getCount() == 1){
+                        if(isWaterable){
+                            liquidBucket = new ItemStack(Items.WATER_BUCKET);
+                        } else {
+                            liquidBucket = new ItemStack(Items.MILK_BUCKET);
+                        }
+                        this.setItem(i, liquidBucket);
+                        hasBucket = false;
+                        break;
+                    }
+                }
+            }
+
+            if(hasBucket){
+                for(int i=0; i<this.getContainerSize(); i++){
+                    if(this.getItem(i).isEmpty()){
+                        ItemStack bucketStack = new ItemStack(Items.BUCKET, this.getItem(bucketIndex).getCount()-1);
+                        this.setItem(bucketIndex, bucketStack);
+                        if(isWaterable){
+                            liquidBucket = new ItemStack(Items.WATER_BUCKET);
+                        } else {
+                            liquidBucket = new ItemStack(Items.MILK_BUCKET);
+                        }
+                        this.setItem(i, liquidBucket);
+                        break;
+                    }
+                }
+            }
+        }
+
+        markUpdated();
     }
 
     public void fillItemsInSlots(List<ItemStack> items){
