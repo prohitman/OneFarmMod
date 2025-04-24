@@ -45,7 +45,7 @@ Both blocks are **passive until powered**:
 
 - Fully supports vanilla entities.
 - Compatible with most modded mobs and creature types.
-- Designed for **Forge / Fabric [your version here]**.
+- Designed for **Forge 1.20.1**.
 
 ---
 
