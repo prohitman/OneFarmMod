@@ -60,3 +60,5 @@ Got a cool idea or compatibility issue? Open an issue or hit me up on Discord.
 
 MIT License.  
 Have fun farming mobs the easy way.
+
+Commissioned by kammcoder via Boroks Development
