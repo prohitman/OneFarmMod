@@ -2,34 +2,25 @@ package com.prohitman.onefarmmod.client.renderer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Axis;
 import com.prohitman.onefarmmod.blocks.entities.OneFarmBlockEntity;
-import com.prohitman.onefarmmod.client.LivingEntityRendererAccessor;
-import com.prohitman.onefarmmod.client.ModRenderType;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EntityModel;
-import net.minecraft.client.model.HumanoidModel;
-import net.minecraft.client.model.WolfModel;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
-import net.minecraft.client.renderer.entity.*;
-import net.minecraft.client.renderer.entity.layers.RenderLayer;
-import net.minecraft.client.renderer.entity.layers.SheepFurLayer;
+import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Pose;
-import net.minecraft.world.entity.animal.Sheep;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.*;
@@ -158,10 +149,8 @@ public class OneFarmBlockEntityRenderer<T extends OneFarmBlockEntity> implements
      * @return The scaling factor to fit the model within a 1x1x1 block.
      */
     public static float calculateScaleFactor(float height, float width, float depth) {
-        // Determine the largest dimension of the model
         float largestDimension = Math.max(height, Math.max(width, depth));
 
-        // Calculate the scaling factor to fit within 1 block (1 unit size)
         return 1.0f / largestDimension;
     }
 
@@ -172,7 +161,6 @@ public class OneFarmBlockEntityRenderer<T extends OneFarmBlockEntity> implements
      * @param scaleFactor The calculated scaling factor.
      */
     public static void scaleModel(PoseStack poseStack, float scaleFactor) {
-        // Apply the scaling transformation to the PoseStack (uniform scaling)
         poseStack.scale(scaleFactor, scaleFactor, scaleFactor);
     }
 

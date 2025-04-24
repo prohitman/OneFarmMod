@@ -3,7 +3,6 @@ package com.prohitman.onefarmmod.datagen.server;
 import com.prohitman.onefarmmod.OneFarmMod;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
-import net.minecraft.tags.BlockTags;
 import net.minecraftforge.common.data.BlockTagsProvider;
 import net.minecraftforge.common.data.ExistingFileHelper;
 import org.jetbrains.annotations.Nullable;

@@ -27,56 +27,7 @@ public class ModItemModelProvider extends ItemModelProvider {
 
     }
 
-    private void createSingleTextureCrossBlock(RegistryObject<Block> block){
-        singleTexture((block.getId().getPath()),
-                mcLoc("item/generated"),
-                "layer0", modLoc("block/" + block.getId().getPath()));
-    }
-
-    private void createBlockSingle(RegistryObject<Block> block){
-        singleTexture((block.getId().getPath()),
-                mcLoc("item/generated"),
-                "layer0", modLoc("item/" + block.getId().getPath()));
-    }
-
-    private void createBlockSingleHandheld(RegistryObject<Block> block){
-        singleTexture((block.getId().getPath()),
-                mcLoc("item/handheld"),
-                "layer0", modLoc("item/" + block.getId().getPath()));
-    }
-
-    private void createParent(RegistryObject<Block> handler) {
-        withExistingParent(handler.getId().getPath(), modLoc( "block/" + handler.getId().getPath()));
-    }
-
     private void createParentBlock(RegistryObject<Block> handler) {
         withExistingParent(handler.getId().getPath() + "_item", modLoc( "block/" + handler.getId().getPath()));
-    }
-
-    private String name(RegistryObject<Block> block) {
-        return block.getId().getPath();
-    }
-
-    private String name(Block block) {
-        return key(block).getPath();
-    }
-
-    private ResourceLocation key(Block block) {
-        return ForgeRegistries.BLOCKS.getKey(block);
-    }
-
-    private void createSingle(RegistryObject<Item> item) {
-        ModelFile generated = getExistingFile(mcLoc("item/generated"));
-        getBuilder(item.getId().getPath()).parent(generated).texture("layer0", modLoc( "item/" + item.getId().getPath()));
-    }
-
-    private void createSingleEffectItem(RegistryObject<Item> item) {
-        ModelFile generated = getExistingFile(mcLoc("item/generated"));
-        getBuilder(item.getId().getPath()).parent(generated).texture("layer0", modLoc( "mob_effect/" + item.getId().getPath()));
-    }
-
-    private void createSingleHandHeld(RegistryObject<Item> item) {
-        ModelFile generated = getExistingFile(mcLoc("item/handheld"));
-        getBuilder(item.getId().getPath()).parent(generated).texture("layer0", modLoc( "item/" + item.getId().getPath()));
     }
 }

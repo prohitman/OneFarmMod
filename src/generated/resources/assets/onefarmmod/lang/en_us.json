@@ -3,5 +3,6 @@
   "block.onefarmmod.one_farm_block": "One Farm",
   "item.tooltip.breederblock": "§7This block generates spawn eggs from entities in adjacent farm blocks when powered by redstone.",
   "item.tooltip.onefarmblock": "§7This block absorbs a passive entity when it walks on top. Once powered by redstone, it generates loot from the captured entity.",
-  "item.tooltip.press_shift": "§b[+SHIFT]"
+  "item.tooltip.press_shift": "§b[+SHIFT]",
+  "itemGroup.onefarmmod": "One Farm Mod"
 }

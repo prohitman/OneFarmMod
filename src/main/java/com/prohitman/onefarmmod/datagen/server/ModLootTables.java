@@ -1,7 +1,6 @@
 package com.prohitman.onefarmmod.datagen.server;
 
 import com.prohitman.onefarmmod.OneFarmMod;
-import com.prohitman.onefarmmod.blocks.OneFarmBlock;
 import net.minecraft.data.loot.packs.VanillaBlockLoot;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.registries.ForgeRegistries;

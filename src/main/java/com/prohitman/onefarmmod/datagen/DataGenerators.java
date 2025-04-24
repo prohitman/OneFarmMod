@@ -26,7 +26,6 @@ public class DataGenerators {
         DataGenerator dataGenerator = event.getGenerator();
         CompletableFuture<HolderLookup.Provider> lookupProvider = event.getLookupProvider();
         ModBlockTags blockTags = new ModBlockTags(dataGenerator.getPackOutput(), lookupProvider, event.getExistingFileHelper());
-        ModBiomeTags biomeTags = new ModBiomeTags(dataGenerator.getPackOutput(), lookupProvider, event.getExistingFileHelper());
         ModEntityTags entityTags = new ModEntityTags(dataGenerator.getPackOutput(), lookupProvider, event.getExistingFileHelper());
 
         dataGenerator.addProvider(event.includeClient(), (DataProvider.Factory<ModBlockStateProvider>)
@@ -49,17 +48,9 @@ public class DataGenerators {
         dataGenerator.addProvider(event.includeServer(), new LootTableProvider(dataGenerator.getPackOutput(), Collections.emptySet(),
                 List.of(new LootTableProvider.SubProviderEntry(ModLootTables::new, LootContextParamSets.BLOCK))));
 
-        dataGenerator.addProvider(event.includeServer(), (DataProvider.Factory<ModBiomeTags>)
-                output -> biomeTags);
 
         dataGenerator.addProvider(event.includeServer(), (DataProvider.Factory<ModEntityTags>)
                 output -> entityTags);
-
-        /*dataGenerator.addProvider(event.includeServer(), (DataProvider.Factory<ModWorldGenProvider>)
-                output -> new ModWorldGenProvider(output, lookupProvider));
-
-        dataGenerator.addProvider(event.includeServer(), new ModGlobalLootModifiers(dataGenerator.getPackOutput()));*/
-
         try {
             dataGenerator.run();
         } catch (IOException ignored) {
