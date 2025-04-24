@@ -1,46 +1,60 @@
+# 🌾 One Farm Mod
 
-Source installation information for modders
--------------------------------------------
-This code follows the Minecraft Forge installation methodology. It will apply
-some small patches to the vanilla MCP source code, giving you and it access 
-to some of the data and functions you need to build a successful mod.
+One block to farm them all.
 
-Note also that the patches are built against "un-renamed" MCP source code (aka
-SRG Names) - this means that you will not be able to read them directly against
-normal code.
+**One Farm Mod** is a Minecraft mod that introduces powerful automation blocks designed to let you farm mob drops and spawn eggs without needing complex farms — all with a single redstone pulse.
 
-Setup Process:
-==============================
+> Designed for both modded and vanilla mobs.
 
-Step 1: Open your command-line and browse to the folder where you extracted the zip file.
+---
 
-Step 2: You're left with a choice.
-If you prefer to use Eclipse:
-1. Run the following command: `./gradlew genEclipseRuns`
-2. Open Eclipse, Import > Existing Gradle Project > Select Folder 
-   or run `gradlew eclipse` to generate the project.
+## 🔧 Features
 
-If you prefer to use IntelliJ:
-1. Open IDEA, and import project.
-2. Select your build.gradle file and have it import.
-3. Run the following command: `./gradlew genIntellijRuns`
-4. Refresh the Gradle Project in IDEA if required.
+### 🧱 One Farm Block
 
-If at any point you are missing libraries in your IDE, or you've run into problems you can 
-run `gradlew --refresh-dependencies` to refresh the local cache. `gradlew clean` to reset everything 
-(this does not affect your code) and then start the process again.
+- Absorbs any entity (modded or vanilla) that walks over it.
+- Displays the absorbed entity’s 3D model **with all its data** hovering above the block.
+- When powered with redstone, it **generates item drops** the entity would drop on death.
+- Stores the generated drops in an internal inventory (container-based block entity).
+- Supports automation mods and hoppers.
 
-Mapping Names:
-=============================
-By default, the MDK is configured to use the official mapping names from Mojang for methods and fields 
-in the Minecraft codebase. These names are covered by a specific license. All modders should be aware of this
-license, if you do not agree with it you can change your mapping names to other crowdsourced names in your 
-build.gradle. For the latest license text, refer to the mapping file itself, or the reference copy here:
-https://github.com/MinecraftForge/MCPConfig/blob/master/Mojang.md
 
-Additional Resources: 
-=========================
-Community Documentation: https://docs.minecraftforge.net/en/1.20.1/gettingstarted/
-LexManos' Install Video: https://youtu.be/8VEdtQLuLO0
-Forge Forums: https://forums.minecraftforge.net/
-Forge Discord: https://discord.minecraftforge.net/
+---
+
+### 🐣 Breeder Block
+
+- Place between **two One Farm Blocks** absorbing the **same entity type**.
+- When powered with redstone, periodically generates **spawn eggs** of the absorbed entity.
+- Has a single-slot inventory to hold the spawn eggs.
+- Works with most entities (supports modded creatures too).
+
+
+---
+
+## 🔌 Redstone Integration
+
+Both blocks are **passive until powered**:
+- Use redstone clocks or pulse generators to trigger drop or egg production.
+- Compatible with redstone automation mods like Create or Redstone Flux.
+
+---
+
+## 📦 Compatibility
+
+- Fully supports vanilla entities.
+- Compatible with most modded mobs and creature types.
+- Designed for **Forge / Fabric [your version here]**.
+
+---
+
+## 🤝 Contributing
+
+Pull requests and feedback are welcome!  
+Got a cool idea or compatibility issue? Open an issue or hit me up on Discord.
+
+---
+
+## 📜 License
+
+MIT License.  
+Have fun farming mobs the easy way.
